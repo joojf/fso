@@ -21,7 +21,6 @@ const Content = (props) => {
 };
 
 const Total = (props) => {
-  let number = 0
   return (
     <>
       <p>Number of exercises {props.parts.exercises}</p>
