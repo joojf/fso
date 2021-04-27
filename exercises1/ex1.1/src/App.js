@@ -12,7 +12,7 @@ const Content = (props) => {
 	const text = props.course.parts.map(function(content) {
 		return (
 			<div>
-				<p>{content.name}: {content.exercises}</p>
+				<p><strong>{content.name}</strong>: {content.exercises}</p>
 			</div>
 		)
 	})
@@ -21,9 +21,16 @@ const Content = (props) => {
 };
 
 const Total = (props) => {
+  let sum = 0
+
+  const total = props.course.parts.map(function(value) {
+    sum = sum + value.exercises
+    return sum
+  })
+
   return (
     <>
-      <p>Number of exercises {props.parts.exercises}</p>
+      <p><strong>Number of exercises:</strong> {sum}</p>
     </>
   )
 }
