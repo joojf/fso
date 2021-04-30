@@ -2,14 +2,14 @@ import React, { useState } from 'react'
 
 const App = () => {
   const [persons, setPersons] = useState([
-    {
-      name: 'Arto Hellas',
-      number: '040 - 1234567',
-      id: 1
-    }
+    { name: 'Arto Hellas', number: '040-123456' },
+    { name: 'Ada Lovelace', number: '39-44-5323523' },
+    { name: 'Dan Abramov', number: '12-43-234345' },
+    { name: 'Mary Poppendieck', number: '39-23-6423122' }
   ])
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
+  const [nameSearch, setNameSearch] = useState('')
 
   const addPerson = (event) => {
     event.preventDefault()
@@ -41,19 +41,30 @@ const App = () => {
     setNewNumber(event.target.value)
   }
 
-  const searching = (event) => {
-    for (let i = 0; i < persons.length; i++) {
-      if (event.searchName === persons[i].name) {
-        window.alert(`${newName} is already added to phonebook`)
-        return
-      }
+  const filterNames = (event) => {
+    setNameSearch(event.target.value);
+
+    const newList = persons.filter(
+      (person) => person.name === nameSearch
+    );
+    console.log(newList)
+
+    if (newList.length > 0) {
+      return newList;
     }
-  }
+
+    return persons;
+  };
 
   return (
     <div>
       <h2>Phonebook</h2>
-      <div>filter shown with <input value={searchName} onChange={searching} /></div>
+      <div>
+        filter shown with <input value={nameSearch} onChange={filterNames} />
+      </div>
+      <ul>
+        <li>{filterNames.name}</li>
+      </ul>
       <h2>add a new</h2>
       <form onSubmit={addPerson}>
         <div>
