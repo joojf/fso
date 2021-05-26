@@ -1,11 +1,29 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
+//import Countries from './components/Countries'
+//import Filter from './components/Filter'
 
 const Countries = ({ filter, countries }) => {
   const countriesToShow = countries.filter(country =>
     country.name.toLowerCase().includes(filter.toLowerCase()))
 
-  if (countriesToShow.length <= 10) {
+  if (countriesToShow.length === 1) {
+    return (
+      countriesToShow.map(country =>
+        <div key={country.numericCode}>
+          <h1>{country.name}</h1>
+          <p>capital {country.capital}</p>
+          <p>population {country.population}</p>
+          <h2>languages</h2>
+          <ul>
+            {country.languages.map(language =>
+              <li>{language.name}</li>)}
+          </ul>
+          <img src={country.flag} heigth="200" width="200" />
+        </div>)
+    )
+  }
+  else if (countriesToShow.length <= 10) {
     return (
       countriesToShow.map(country =>
         <p key={country.numericCode}>{country.name}</p>
