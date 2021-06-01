@@ -5,9 +5,12 @@ const Persons = (props) => {
         <div>
             <h2>Numbers</h2>
             {props.persons.map((person) => (
-                <p key={person.id}>
-                    {person.name} {person.number}{' '}
-                </p>
+                <div>
+                    <p key={person.id}>
+                        {person.name} {person.number}{' '}
+                        <button type="button" value={person.id} onClick={props.handleDelete}>delete</button>
+                    </p>
+                </div>
             ))}
         </div>
     )
