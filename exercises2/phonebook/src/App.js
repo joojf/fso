@@ -4,17 +4,23 @@ import PersonForm from './components/PersonForm'
 import Persons from './components/Persons'
 import axios from 'axios'
 
+const baseUrl = 'http://localhost:3001/persons'
+const create = (personObject) => 
+  axios.post(baseUrl, personObject)
+const getAll = () => 
+  axios.get(baseUrl)
+
 const App = () => {
   const [persons, setPersons] = useState([])
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [filter, setFilter] = useState('')
 
+
   useEffect(() => {
-    axios
-      .get('http://localhost:3001/persons').then(response => {
-        setPersons(response.data)
-      })
+    getAll().then(response => {
+      setPersons(response.data)
+    })
   }, [])
 
   const addPerson = (event) => {
@@ -33,9 +39,14 @@ const App = () => {
       }
     }
 
-    setPersons(persons.concat(personObject))
-    setNewName('')
-    setNewNumber('')
+    create({
+      name: newName,
+      number: newNumber
+    }).then(response => {
+      setPersons(persons.concat(personObject))
+      setNewName('')
+      setNewNumber('')
+    })
   }
 
   const handleNameChange = (event) => {
