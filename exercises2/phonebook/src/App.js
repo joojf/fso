@@ -29,6 +29,7 @@ const App = () => {
       number: newNumber
     }
 
+
     for (let i = 0; i < persons.length; i++) {
       if (personObject.name === persons[i].name) {
         if (personObject.number !== persons[i].number) {
@@ -60,6 +61,7 @@ const App = () => {
         }, 5000)
       })
   }
+  
 
   const handleDelete = (event) => {
     event.preventDefault()
