@@ -1,15 +1,14 @@
 import React from 'react'
 
-const Persons = (props) => {
+const Persons = ({ persons, handleDelete }) => {
     return (
         <div>
-            <h2>Numbers</h2>
-            {props.persons.map((person) => (
-                <div>
-                    <p key={person.id}>
-                        {person.name} {person.number}{' '}
-                        <button type="button" value={person.id} onClick={props.handleDelete}>delete</button>
-                    </p>
+            {persons.map((person, index) => (
+                <div key={index}>
+                    {person.name} {person.number}{' '}
+                    <button value={person.id} onClick={handleDelete}>
+                        Delete
+                    </button>
                 </div>
             ))}
         </div>
