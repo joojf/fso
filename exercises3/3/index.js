@@ -1,5 +1,7 @@
+require('dotenv').config()
 const express = require('express')
 const app = express()
+const Person = require('./models/person')
 const morgan = require('morgan')
 const cors = require('cors')
 
@@ -28,6 +30,7 @@ let persons = [
 
 app.use(express.json())
 app.use(cors())
+app.use(express.json())
 
 morgan.token('body', (req, res) => {
     return JSON.stringify(req.body)
@@ -44,7 +47,9 @@ app.get('/', (req, res) => {
 })
 
 app.get('/api/persons', (req, res) => {
-    res.json(persons)
+    Person.find({}).then((persons) => {
+        res.json(persons)
+    })
 })
 
 app.get('/info', (req, res) => {
@@ -54,13 +59,9 @@ app.get('/info', (req, res) => {
 })
 
 app.get('/api/persons/:id', (req, res) => {
-    const id = Number(req.params.id)
-    const person = persons.find((person) => person.id === id)
-    if (person) {
+    Person.findById(req.params.id).then((person) => {
         res.json(person)
-    } else {
-        res.status(404).end()
-    }
+    })
 })
 
 app.delete('/api/persons/:id', (req, res) => {
@@ -68,11 +69,6 @@ app.delete('/api/persons/:id', (req, res) => {
     persons = persons.filter((person) => person.id !== id)
     res.status(204).end()
 })
-
-const generateId = () => {
-    const id = Math.random() * (10000 - persons.length)
-    return Math.round(id)
-}
 
 app.post('/api/persons', (req, res) => {
     const body = req.body
@@ -89,18 +85,18 @@ app.post('/api/persons', (req, res) => {
         })
     }
 
-    const person = {
-        id: generateId(),
+    const person = new Person({
+        id: body.id,
         name: body.name,
         number: body.number,
-    }
+    })
 
-    persons = persons.concat(person)
-
-    res.json(person)
+    person.save().then((person) => {
+        res.json(person)
+    })
 })
 
-const PORT = 3001
+const PORT = process.env.PORT
 app.listen(PORT, () => {
     console.log(`server running on port ${PORT}`)
 })
