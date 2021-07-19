@@ -17,12 +17,20 @@ const update = (id, newObject) => {
     return request.then((response) => response.data)
 }
 
+const remove = (id) => {
+    if (window.confirm(`Are you sure you want to delete this person?`)) {
+        const request = axios.delete(`${baseUrl}/${id}`)
+        return request.then((response) => response.data)
+    }
+}
+
+/*
 const remove = (personObject) => {
     if (window.confirm(`Delete ${personObject.name}?`)) {
         return axios
             .delete(`${baseUrl}/${personObject.id}`)
             .then((response) => response.data)
     }
-}
+} */
 
 export default { getAll, create, update, remove }

@@ -74,20 +74,15 @@ const App = () => {
 
     const handleDelete = (event) => {
         event.preventDefault()
-        const id = parseInt(event.target.value)
-        const name = persons[id - 1].name
-        personService.remove(persons[id - 1]).catch((error) => {
-            setMessageState('error')
-            setMessage(
-                `information of ${name} has already been removed from server`
-            )
+        const id = event.target.value
+        personService.remove(id).then((response) => {
+            setPersons(persons.filter((p) => p.id !== id))
+            setMessage(`Removed succesfully`)
+            setMessageState('valid')
             setTimeout(() => {
                 setMessage(null)
-                setMessageState('error')
-            }, 1000)
-            setPersons(persons.filter((n) => n.id !== id))
+            }, 5000)
         })
-        setPersons(persons.filter((n) => n.id !== id))
     }
 
     const handleNameChange = (event) => {
