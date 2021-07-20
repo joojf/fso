@@ -4,6 +4,7 @@ const app = express()
 const Person = require('./models/person')
 const morgan = require('morgan')
 const cors = require('cors')
+const { response } = require('express')
 
 let persons = [
     {
@@ -30,7 +31,6 @@ let persons = [
 
 app.use(express.json())
 app.use(cors())
-app.use(express.json())
 
 morgan.token('body', (req, res) => {
     return JSON.stringify(req.body)
@@ -59,18 +59,28 @@ app.get('/info', (req, res) => {
 })
 
 app.get('/api/persons/:id', (req, res) => {
-    Person.findById(req.params.id).then((person) => {
-        res.json(person)
-    })
+    Person.findById(req.params.id)
+        .then((person) => {
+            if (person) {
+                res.json(person)
+            } else {
+                res.status(404).end()
+            }
+        })
+        .catch((err) => {
+            res.status(500).end()
+        })
 })
 
 app.delete('/api/persons/:id', (req, res) => {
     //delete the person
-    Person.findById(req.params.id).then((person) => {
-        person.remove().then((person) => {
-            res.json(person)
+    Person.findByIdAndRemove(req.params.id)
+        .then((result) =>
+            response.status(204).send(`Person ${req.params.id} deleted`)
+        )
+        .catch((err) => {
+            res.status(500).end()
         })
-    })
 })
 
 app.post('/api/persons', (req, res) => {
