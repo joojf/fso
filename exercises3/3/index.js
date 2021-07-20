@@ -42,6 +42,19 @@ app.use(
     )
 )
 
+const errorHandler = (err, req, res, next) => {
+    console.log(err.message)
+
+    if (err.name === 'CastError') {
+        res.status(400).json({
+            error: 'malformatted id',
+        })
+    }
+    next(err)
+}
+
+app.use(errorHandler)
+
 app.get('/', (req, res) => {
     res.send('home page')
 })
@@ -68,7 +81,7 @@ app.get('/api/persons/:id', (req, res) => {
             }
         })
         .catch((err) => {
-            res.status(500).end()
+            next(err)
         })
 })
 
@@ -79,7 +92,7 @@ app.delete('/api/persons/:id', (req, res) => {
             response.status(204).send(`Person ${req.params.id} deleted`)
         )
         .catch((err) => {
-            res.status(500).end()
+            next(err)
         })
 })
 
