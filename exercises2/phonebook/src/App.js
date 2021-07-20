@@ -70,6 +70,13 @@ const App = () => {
                     setMessage(null)
                 }, 5000)
             })
+            .catch((error) => {
+                setMessage(`Error: ${error.message}`)
+                setMessageState('error')
+                setTimeout(() => {
+                    setMessage(null)
+                }, 5000)
+            })
     }
 
     const handleDelete = (event) => {
