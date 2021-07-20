@@ -28,55 +28,47 @@ const App = () => {
             number: newNumber,
         }
 
-        for (let i = 0; i < persons.length; i++) {
-            if (personObject.name === persons[i].name) {
-                if (personObject.number !== persons[i].number) {
+        // if name is already in the list, update the number
+        persons.forEach((person) => {
+            if (person.name === personObject.name) {
+                if (
+                    window.confirm(
+                        `${personObject.name} already exists. Do you want to update the number?`
+                    )
+                ) {
                     personService
-                        .update(persons[i].id, {
-                            name: persons[i].name,
+                        .update(person.id, {
+                            name: personObject.name,
                             number: personObject.number,
                         })
-                        .then((person) => {
-                            if (
-                                window.confirm(
-                                    `${person.name} is already added to phonebook, replace the old number with a new one?`
-                                )
-                            ) {
-                                setPersons(
-                                    persons.map((p) =>
-                                        p.id !== persons[i].id ? p : person
-                                    )
-                                )
-                            }
+                        .then((persons) => {
+                            setPersons(response)
                         })
                 } else {
-                    window.alert(
-                        `${personObject.name} is already added to phonebook`
-                    )
+                    window.alert(`${personObject.name} already exists.`)
                 }
                 return
             }
-        }
-
-        personService
-            .create({ name: newName, number: newNumber })
-            .then((response) => {
-                setPersons(persons.concat(response))
-                setNewName('')
-                setNewNumber('')
-                setMessage(`Added ${response.name} succesfully`)
-                setMessageState('valid')
-                setTimeout(() => {
-                    setMessage(null)
-                }, 5000)
-            })
-            .catch((error) => {
-                setMessage(`Error: ${error.message}`)
-                setMessageState('error')
-                setTimeout(() => {
-                    setMessage(null)
-                }, 5000)
-            })
+            personService
+                .create({ name: newName, number: newNumber })
+                .then((response) => {
+                    setPersons(persons.concat(response))
+                    setNewName('')
+                    setNewNumber('')
+                    setMessage(`Added ${response.name} succesfully`)
+                    setMessageState('valid')
+                    setTimeout(() => {
+                        setMessage(null)
+                    }, 5000)
+                })
+                .catch((error) => {
+                    setMessage(`Error: ${error.message}`)
+                    setMessageState('error')
+                    setTimeout(() => {
+                        setMessage(null)
+                    }, 5000)
+                })
+        })
     }
 
     const handleDelete = (event) => {
