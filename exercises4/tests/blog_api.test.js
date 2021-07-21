@@ -38,6 +38,23 @@ test('verify if the unique identifier property of the blog posts is named "id"',
     expect(response.body[1].id).toBeDefined()
 })
 
+test('create a new blog post', async () => {
+    const newBlog = {
+        title: 'New blog post',
+        author: 'A new author',
+        url: 'http://example.com/new-blog-post',
+        likes: 2,
+    }
+
+    const response = await api.post('/api/blogs').send(newBlog).expect(201)
+
+    const newBlogPost = response.body
+    expect(newBlogPost.title).toBe(newBlog.title)
+    expect(newBlogPost.author).toBe(newBlog.author)
+    expect(newBlogPost.url).toBe(newBlog.url)
+    expect(newBlogPost.likes).toBe(newBlog.likes)
+})
+
 afterAll(() => {
     mongoose.connection.close()
 })
