@@ -55,7 +55,6 @@ test('create a new blog post', async () => {
     expect(newBlogPost.likes).toBe(newBlog.likes)
 })
 
-// write a test that verifies that if the likes property is missing from the request, it will default to the value 0
 test('create a new blog post with missing likes property', async () => {
     const newBlog = {
         title: 'Testing likes',
