@@ -66,6 +66,15 @@ test('create a new blog post with missing likes property', async () => {
     expect(newBlogPost.likes).toBe(0)
 })
 
+test('create a new blog post with missing title and url properties', async () => {
+    const newBlog = {
+        author: 'No title',
+        likes: 100,
+    }
+
+    const response = await api.post('/api/blogs').send(newBlog).expect(400)
+})
+
 afterAll(() => {
     mongoose.connection.close()
 })

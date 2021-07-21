@@ -13,6 +13,11 @@ const unknownEndpoint = (req, res) => {
 
 const errorHandler = (err, req, res, next) => {
     logger.error(err)
+
+    if (err.name === 'ValidationError') {
+        res.status(400).send(err.message)
+    }
+
     res.status(500).send('Internal server error')
 }
 
