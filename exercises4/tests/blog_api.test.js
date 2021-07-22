@@ -84,6 +84,23 @@ test('deleting a single blog resource', async () => {
     expect(blogsAfterDelete.body).toHaveLength(blogsInDB.body.length - 1)
 })
 
+test('updating a blog number of likes', async () => {
+    //update the number of likes of a blog post to 300
+    const blogsInDb = await api.get('/api/blogs')
+    const blogId = blogsInDb.body[0].id
+    const response = await api
+        .put(`/api/blogs/${blogId}`)
+        .send({
+            title: blogsInDb.body[0].title,
+            author: blogsInDb.body[0].author,
+            url: blogsInDb.body[0].url,
+            likes: 300,
+        })
+        .expect(200)
+    const blogAfterUpdate = response.body
+    expect(blogAfterUpdate.likes).toBe(300)
+})
+
 afterAll(() => {
     mongoose.connection.close()
 })
