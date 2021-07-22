@@ -40,7 +40,7 @@ blogsRouter.post('/', async (req, res, next) => {
 blogsRouter.delete('/:id', async (req, res, next) => {
     try {
         const blog = await Blog.findByIdAndRemove(req.params.id)
-        res.json(blog)
+        res.status(204).json(blog)
     } catch (err) {
         next(err)
     }

@@ -75,6 +75,15 @@ test('create a new blog post with missing title and url properties', async () =>
     const response = await api.post('/api/blogs').send(newBlog).expect(400)
 })
 
+test('deleting a single blog resource', async () => {
+    const blogsInDB = await api.get('/api/blogs')
+    const blogId = blogsInDB.body[0].id
+    const response = await api.delete(`/api/blogs/${blogId}`).expect(204)
+
+    const blogsAfterDelete = await api.get('/api/blogs')
+    expect(blogsAfterDelete.body).toHaveLength(blogsInDB.body.length - 1)
+})
+
 afterAll(() => {
     mongoose.connection.close()
 })
