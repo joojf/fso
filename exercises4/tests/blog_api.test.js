@@ -85,7 +85,6 @@ test('deleting a single blog resource', async () => {
 })
 
 test('updating a blog number of likes', async () => {
-    //update the number of likes of a blog post to 300
     const blogsInDb = await api.get('/api/blogs')
     const blogId = blogsInDb.body[0].id
     const response = await api
