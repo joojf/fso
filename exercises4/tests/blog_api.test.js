@@ -3,6 +3,8 @@ const supertest = require('supertest')
 const app = require('../app')
 const api = supertest(app)
 const Blog = require('../models/blog')
+const User = require('../models/user')
+const bcrypt = require('bcrypt')
 
 const initialData = [
     {
@@ -98,6 +100,39 @@ test('updating a blog number of likes', async () => {
         .expect(200)
     const blogAfterUpdate = response.body
     expect(blogAfterUpdate.likes).toBe(300)
+})
+
+describe('testing with one user in the db', () => {
+    beforeEach(async () => {
+        await User.deleteMany({})
+        const passwordHash = await bcrypt.hash('jooj', 10)
+        const user = new User({
+            username: 'root',
+            password: passwordHash,
+        })
+        await user.save()
+    })
+    test('creation is successful', async () => {
+        const usersAtStart = await User.find({})
+
+        const newUser = {
+            username: 'jorgef',
+            name: 'Jorge',
+            password: 'brazil',
+        }
+
+        await api
+            .post('/api/users')
+            .send(newUser)
+            .expect(200)
+            .expect('Content-Type', /application\/json/)
+
+        const usersAfterCreation = await User.find({})
+        expect(usersAfterCreation).toHaveLength(usersAtStart.length + 1)
+
+        const usernames = usersAfterCreation.map((user) => user.username)
+        expect(usernames).toContain(newUser.username)
+    })
 })
 
 afterAll(() => {
