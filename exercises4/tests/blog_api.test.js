@@ -177,8 +177,6 @@ describe('tests for login with error', () => {
         }
         const response = await api.post('/api/users').send(login).expect(400)
 
-        console.log(response.body.password)
-
         expect(response.body.message).toBe('Username already exists')
     })
 })
