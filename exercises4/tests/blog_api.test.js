@@ -135,6 +135,54 @@ describe('testing with one user in the db', () => {
     })
 })
 
+describe('tests for login with error', () => {
+    beforeEach(async () => {
+        await User.deleteMany({})
+        const passwordHash = await bcrypt.hash('jooj', 10)
+        const user = new User({
+            username: 'root',
+            password: passwordHash,
+        })
+        await user.save()
+    })
+    test('login with a password with less than 3 characters', async () => {
+        const login = {
+            username: 'root',
+            name: 'Brazil',
+            password: 'jo',
+        }
+        const response = await api.post('/api/users').send(login).expect(400)
+
+        expect(response.body.message).toBe(
+            'Username and password must be at least 3 characters long'
+        )
+    })
+    test('login with an username with less than 3 characters', async () => {
+        const login = {
+            username: 'ro',
+            name: 'Brazil',
+            password: 'jooj',
+        }
+        const response = await api.post('/api/users').send(login).expect(400)
+
+        expect(response.body.message).toBe(
+            'Username and password must be at least 3 characters long'
+        )
+    })
+    test('login with a username that already exists', async () => {
+        const login = {
+            username: 'root',
+            name: 'Brazil',
+            password: 'jooj',
+        }
+        const response = await api.post('/api/users').send(login).expect(400)
+
+        console.log(response.body.password)
+
+        expect(response.body.message).toBe('Username already exists')
+    })
+})
+
 afterAll(() => {
     mongoose.connection.close()
 })
