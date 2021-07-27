@@ -3,14 +3,6 @@ const Blog = require('../models/blog')
 const User = require('../models/user')
 const jwt = require('jsonwebtoken')
 
-const getTokenFrom = (req) => {
-    const authorization = req.headers('authorization')
-    if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
-        return authorization.substring(7)
-    }
-    return null
-}
-
 blogsRouter.get('/', async (req, res) => {
     const blogs = await Blog.find({}).populate('user', {
         username: 1,
@@ -32,13 +24,13 @@ blogsRouter.get('/:id', async (req, res, next) => {
 blogsRouter.post('/', async (req, res, next) => {
     const body = req.body
 
-    const token = getTokenFrom(req)
-    const decoded = jwt.verify(token, process.env.SECRET)
-    if (!token || !decoded) {
-        return res.status(401).json({
-            message: 'Unauthorized',
+    const decoded = jwt.verify(req.token, process.env.SECRET)
+    if (!req.token || !decoded) {
+        return res.status(401).send({
+            message: 'Could not authenticate token.',
         })
     }
+
     const user = await User.findById(decoded.id)
 
     const blog = new Blog({
