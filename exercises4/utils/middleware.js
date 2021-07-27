@@ -8,13 +8,11 @@ const requestLogger = (req, res, next) => {
 }
 
 const tokenExtractor = (req, res, next) => {
-    if (req.headers.authorization) {
-        const token = req.headers.authorization.split(' ')[1]
-        req.token = token
-        next()
-    } else {
-        res.status(401).send('Unauthorized')
+    const authorization = req.get('authorization')
+    if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
+        return authorization.substring(7)
     }
+    next()
 }
 
 const unknownEndpoint = (req, res) => {
