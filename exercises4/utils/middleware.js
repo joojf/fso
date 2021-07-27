@@ -16,6 +16,8 @@ const errorHandler = (err, req, res, next) => {
 
     if (err.name === 'ValidationError') {
         res.status(400).send(err.message)
+    } else if (err.name === 'JsonWebTokenError') {
+        res.status(401).send(err.message)
     }
 
     res.status(500).send('Internal server error')
