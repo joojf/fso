@@ -1,41 +1,39 @@
 const bcrypt = require('bcryptjs')
-const usersRouter = require('express').Router()
+const router = require('express').Router()
 const User = require('../models/user')
 
-usersRouter.get('/', async (req, res) => {
-    const users = await User.find({}).populate('blogs')
-    res.json(users)
+router.get('/', async (request, response) => {
+    const users = await User.find({}).populate('blogs', {
+        title: 1,
+        url: 1,
+        likes: 1,
+        author: 1,
+    })
+
+    response.json(users.map((u) => u.toJSON()))
 })
 
-usersRouter.post('/', async (req, res) => {
-    const body = req.body
+router.post('/', async (request, response) => {
+    const { password, name, username } = request.body
 
-    // if the username or password is less than 3 characters, return an error
-    if (body.username.length < 3 || body.password.length < 3) {
-        res.status(400).json({
-            message: 'Username and password must be at least 3 characters long',
+    if (!password || password.length < 3) {
+        return response.status(400).send({
+            error: 'password must min length 3',
         })
-        return
-    }
-    // if the username already exists, return an error
-    if (await User.findOne({ username: body.username })) {
-        res.status(400).json({
-            message: 'Username already exists',
-        })
-        return
     }
 
     const saltRounds = 10
-    const passwordHash = await bcrypt.hash(body.password, saltRounds)
+    const passwordHash = await bcrypt.hash(password, saltRounds)
 
     const user = new User({
-        username: body.username,
-        name: body.name,
+        username,
+        name,
         passwordHash,
     })
 
     const savedUser = await user.save()
-    res.json(savedUser)
+
+    response.json(savedUser)
 })
 
-module.exports = usersRouter
+module.exports = router
