@@ -68,6 +68,8 @@ const App = () => {
         setUser(null)
     }
 
+    const sortedBlogs = blogs.sort((a, b) => b.likes - a.likes)
+
     const increaseLikes = async (blog) => {
         const updatedBlog = {
             ...blog,
@@ -84,6 +86,22 @@ const App = () => {
             )
         } catch (error) {
             console.log(error)
+        }
+    }
+
+    const removeBlog = async (blog) => {
+        if (window.confirm(`Remove blog ${blog.title} by ${blog.author}?`)) {
+            try {
+                await blogService.remove(blog.id)
+                setBlogs(blogs.filter((b) => b.id !== blog.id))
+                setMessage(`Blog ${blog.title} by ${blog.author} removed`)
+                setMessageState('success')
+                setTimeout(() => setMessage(null), 3000)
+            } catch (error) {
+                setMessage('Blog already removed')
+                setMessageState('error')
+                setTimeout(() => setMessage(null), 3000)
+            }
         }
     }
 
@@ -105,8 +123,6 @@ const App = () => {
         </Togglable>
     )
 
-    const sortedBlogs = blogs.sort((a, b) => b.likes - a.likes)
-
     return (
         <div>
             <h1>Blogs</h1>
@@ -126,6 +142,7 @@ const App = () => {
                         key={blog.id}
                         blog={blog}
                         increaseLikes={increaseLikes}
+                        deleteBlog={removeBlog}
                     />
                 ))}
             </div>

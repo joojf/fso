@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-const Blog = ({ blog, increaseLikes }) => {
+const Blog = ({ blog, increaseLikes, deleteBlog }) => {
     const blogStyle = {
         paddingTop: 10,
         paddingLeft: 2,
@@ -26,6 +26,15 @@ const Blog = ({ blog, increaseLikes }) => {
                         </button>
                     </div>
                     <div>added by {blog.user.name}</div>
+                    <div>
+                        {blog.user.username ===
+                        JSON.parse(window.localStorage.getItem('loggedUser'))
+                            .username ? (
+                            <button onClick={() => deleteBlog(blog)}>
+                                delete
+                            </button>
+                        ) : null}
+                    </div>
                 </div>
             )
         }
