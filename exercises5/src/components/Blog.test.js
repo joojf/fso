@@ -74,3 +74,4 @@ test('clicking the like button twice calls event handler twice', () => {
 
     expect(mockHandler.mock.calls.length).toBe(2)
 })
+
