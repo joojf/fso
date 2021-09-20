@@ -8,9 +8,6 @@ import BlogForm from './components/BlogForm'
 import Togglable from './components/Togglable'
 
 const App = () => {
-    const [title, setTitle] = useState('')
-    const [author, setAuthor] = useState('')
-    const [url, setUrl] = useState('')
     const [blogs, setBlogs] = useState([])
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
@@ -50,25 +47,17 @@ const App = () => {
         }
     }
 
-    const addBlog = async (event) => {
-        event.preventDefault()
-        console.log(title, author, url)
-        const blogObject = {
-            title: title,
-            author: author,
-            url: url,
-        }
+    const addBlog = async (blogObject) => {
         try {
-            const blog = await blogService.create(blogObject)
-            setBlogs(blogs.concat(blog))
-            setTitle('')
-            setAuthor('')
-            setUrl('')
-            setMessage('Blog added')
+            const returnedBlog = await blogService.create(blogObject)
+            setBlogs(blogs.concat(returnedBlog))
+            setMessage(
+                `a new blog ${returnedBlog.title} by ${returnedBlog.author} added`
+            )
             setMessageState('success')
             setTimeout(() => setMessage(null), 3000)
         } catch (error) {
-            setMessage(error)
+            setMessage('Blog already exists')
             setMessageState('error')
             setTimeout(() => setMessage(null), 3000)
         }
@@ -88,15 +77,7 @@ const App = () => {
 
     const blogForm = () => (
         <Togglable buttonLabel="new blog">
-            <BlogForm
-                title={title}
-                author={author}
-                url={url}
-                handleTitleChange={({ target }) => setTitle(target.value)}
-                handleAuthorChange={({ target }) => setAuthor(target.value)}
-                handleUrlChange={({ target }) => setUrl(target.value)}
-                handleSubmit={addBlog}
-            />
+            <BlogForm createBlog={addBlog} />
         </Togglable>
     )
     return (
