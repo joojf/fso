@@ -63,6 +63,11 @@ const App = () => {
         }
     }
 
+    const handleLogout = () => {
+        window.localStorage.removeItem('loggedUser')
+        setUser(null)
+    }
+
     const loginForm = () => (
         <Togglable buttonLabel="login">
             <LoginForm
@@ -89,12 +94,15 @@ const App = () => {
             ) : (
                 <div>
                     <p>{user.username} logged in!</p> {blogForm()}{' '}
+                    <button onClick={handleLogout}>logout</button>
                 </div>
             )}
 
             <div>
                 {blogs.map((blog) => (
-                    <Blog blog={blog} />
+                    <div>
+                        <Blog blog={blog} />
+                    </div>
                 ))}
             </div>
         </div>
