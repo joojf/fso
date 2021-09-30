@@ -1,6 +1,7 @@
 import React from 'react'
 
 const AnecdoteList = ({ anecdotes, vote }) => (
+
     <div>
         {anecdotes.map((anecdote) => (
             <div key={anecdote.id}>
