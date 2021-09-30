@@ -4,6 +4,7 @@ import { createAnecdote, voteAnecdote } from './reducers/anecdoteReducer'
 import AnecdoteForm from './components/AnecdoteForm'
 import AnecdoteList from './components/AnecdoteList'
 import Notification from './components/Notification'
+import Filter from './components/Filter'
 import { setNotification, removeNotification } from './reducers/notificationReducer'
 
 const App = () => {
@@ -35,6 +36,7 @@ const App = () => {
         <div>
             <h2>Anecdotes</h2>
             <Notification/>
+            <Filter />
             <AnecdoteList anecdotes={orderedAnecdotes} vote={vote} />
             <AnecdoteForm addAnecdote={addAnecdote} />
         </div>
