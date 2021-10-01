@@ -13,10 +13,8 @@ const App = () => {
     const dispatch = useDispatch()
 
     useEffect(() => {
-        anecdoteService.getAll().then(anecdotes => {
-            dispatch(initializeAnecdotes(anecdotes))
-        })
-    }, [dispatch])
+        dispatch(initializeAnecdotes()) 
+    }, [dispatch]) 
 
     const addAnecdote = async (event) => {
         event.preventDefault()
