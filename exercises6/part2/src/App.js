@@ -5,7 +5,7 @@ import AnecdoteForm from './components/AnecdoteForm'
 import AnecdoteList from './components/AnecdoteList'
 import Notification from './components/Notification'
 import Filter from './components/Filter'
-import { setNotification, removeNotification } from './reducers/notificationReducer'
+import { setNotification } from './reducers/notificationReducer'
 
 
 const App = () => {
@@ -21,19 +21,13 @@ const App = () => {
         const content = event.target.anecdote.value
         event.target.anecdote.value = ''
         dispatch(createAnecdote(content))
-        dispatch(setNotification(`you added '${content}'`))
-        setTimeout(() => {
-            dispatch(removeNotification())
-        }, 5000)
+        dispatch(setNotification(`you added '${content}'`, 10))
     }
 
     const vote = (id) => {
         const anecdoteToVote = anecdotes.find(a => a.id === id)
         dispatch(voteAnecdote(id, anecdoteToVote))
-        dispatch(setNotification(`you voted '${anecdoteToVote.content}'`))
-        setTimeout(() => {
-            dispatch(removeNotification())
-        }, 5000)
+        dispatch(setNotification(`you voted '${anecdoteToVote.content}'`, 10))
     }
 
     const orderedAnecdotes = anecdotes.sort((a, b) => b.votes - a.votes)
