@@ -20,9 +20,7 @@ const Anecdote = ({anecdotes, vote}) => {
 }
 
 const AnecdoteList = ({ vote }) => {
-    const anecdotes = useSelector(({filter, anecdotes}) => {
-        return anecdotes.filter(anecdote => anecdote.content.toLowerCase().includes(filter))
-    })
+    const anecdotes = useSelector(state => state.anecdotes)
 
     return(<div>
         <Anecdote anecdotes={anecdotes} vote={vote} />

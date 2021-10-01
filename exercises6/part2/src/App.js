@@ -18,12 +18,13 @@ const App = () => {
         })
     }, [dispatch])
 
-    const addAnecdote = (event) => {
+    const addAnecdote = async (event) => {
         event.preventDefault()
         const content = event.target.anecdote.value
         event.target.anecdote.value = ''
-        dispatch(createAnecdote(content))
-        dispatch(setNotification(`you added '${content}'`))
+        const newAnecdote = await anecdoteService.createNew(content)
+        dispatch(createAnecdote(newAnecdote))
+        dispatch(setNotification(`Anecdote '${newAnecdote.content}' added`))
         setTimeout(() => {
             dispatch(removeNotification())
         }, 5000)
