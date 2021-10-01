@@ -6,7 +6,7 @@ import AnecdoteList from './components/AnecdoteList'
 import Notification from './components/Notification'
 import Filter from './components/Filter'
 import { setNotification, removeNotification } from './reducers/notificationReducer'
-import anecdoteService from './services/anecdotes'
+
 
 const App = () => {
     const anecdotes = useSelector((state) => state.anecdotes)
@@ -20,9 +20,8 @@ const App = () => {
         event.preventDefault()
         const content = event.target.anecdote.value
         event.target.anecdote.value = ''
-        const newAnecdote = await anecdoteService.createNew(content)
-        dispatch(createAnecdote(newAnecdote))
-        dispatch(setNotification(`Anecdote '${newAnecdote.content}' added`))
+        dispatch(createAnecdote(content))
+        dispatch(setNotification(`you added '${content}'`))
         setTimeout(() => {
             dispatch(removeNotification())
         }, 5000)
