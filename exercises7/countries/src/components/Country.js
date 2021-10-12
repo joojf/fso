@@ -5,7 +5,6 @@ const Country = ({ country }) => {
     if (!country) {
         return null
     } else {
-        console.log(country)
       return (
         <div>
           <h3>{country.name.common}</h3>
