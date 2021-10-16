@@ -1,26 +1,27 @@
+/* eslint-disable react/prop-types */
 import React, { useState } from 'react'
 
 import { useMutation, useQuery } from '@apollo/client'
 import { GET_AUTHORS } from '../queries'
 import { EDIT_AUTHOR } from '../mutations'
 
-const EditAuthor = () => {
+const EditAuthor = ({ authors }) => {
   const [name, setName] = useState('')
   const [born, setBorn] = useState('')
 
-  const [editBorn] = useMutation(EDIT_AUTHOR, {
+  const [editAuthor] = useMutation(EDIT_AUTHOR, {
     refetchQueries: [{ query: GET_AUTHORS }],
     onError: (error) => {
       console.log(error)
     }
   })
-
   const submit = async (event) => {
     event.preventDefault()
-    await editBorn({
+
+    await editAuthor({
       variables: {
         name,
-        setBornTo: parseInt(born)
+        setBornTo: born
       }
     })
     setName('')
@@ -31,13 +32,10 @@ const EditAuthor = () => {
     <div>
         <h2>Set birthyear</h2>
         <form onSubmit={submit}>
-            <div>
-                name
-                <input
-                    value={name}
-                    onChange={({ target }) => setName(target.value)}
-                />
-            </div>
+            <select value={name} onChange={({ target }) => setName(target.value)}>
+                {authors.map(a =>
+                <option key={a.name} value={a.name}>{a.name}</option>)}
+            </select>
             <div>
                 born
                 <input
@@ -84,7 +82,7 @@ const Authors = () => {
             )}
         </tbody>
       </table>
-      <EditAuthor />
+      <EditAuthor authors={data.allAuthors} />
 
     </div>
   )
