@@ -1,6 +1,5 @@
-const { ApolloServer, gql } = require('apollo-server')
+const { ApolloServer, gql, UserInputError } = require('apollo-server')
 const mongoose = require('mongoose')
-const { v1: uuid } = require('uuid')
 const Book = require('./models/Book')
 const Author = require('./models/Author')
 require('dotenv').config()
@@ -51,45 +50,52 @@ const typeDefs = gql`
 
 const resolvers = {
   Query: {
-    bookCount: () => books.length,
-    authorCount: () => authors.length,
+    bookCount: () => Book.collection.countDocuments(),
+    authorCount: () => Author.collection.countDocuments(),
     allBooks: (root, args) => {
-      if (args.author) {
-        return books.filter(book => book.author === args.author)
+      if (args.author && args.genre) {
+        return Book.find({ author: args.author, genres: { $in: [args.genre] } }).exec()
+      } else if (args.author) {
+        return Book.find({ author: args.author }).exec()
       } else if (args.genre) {
-        return books.filter(book => book.genres.includes(args.genre))
+        return Book.find({ genres: args.genre }).exec()
       } else {
-        return books
+        return Book.find({}).exec()
       }
     },
     allAuthors: () => {
-      const result = authors.map(author => {
-        const bookCount = books.filter(book => book.author === author.name).length
-        return { ...author, bookCount }
-      })
-      return result
+      return Author.find({}).exec()
     }
   },
   Mutation: {
-    addBook: (root, args) => {
-      const book = { ...args, id: uuid() }
-      const author = authors.find(author => author.name === args.author)
+    addBook: async (root, args) => {
+      const author = await Author.findOne({ name: args.author })
       if (!author) {
-        const newAuthor = {
-          name: args.author,
-          id: uuid()
-        }
-        authors.push(newAuthor)
+        throw new UserInputError(`Author ${args.author} not found`)
       }
-      books.push(book)
+      const book = new Book({ ...args, author: author })
+      try {
+        await book.save()
+      } catch (error) {
+        throw new UserInputError(error.message, {
+          invalidArgs: args
+        })
+      }
       return book
     },
-    editAuthor: (root, args) => {
-      const author = authors.find(author => author.name === args.name)
+    editAuthor: async (root, args) => {
+      const author = await Author.findOne({ name: args.name })
       if (!author) {
-        return null
+        throw new UserInputError(`Author ${args.name} not found`)
       }
       author.born = args.setBornTo
+      try {
+        await author.save()
+      } catch (error) {
+        throw new UserInputError(error.message, {
+          invalidArgs: args
+        })
+      }
       return author
     }
   }
