@@ -52,28 +52,39 @@ const resolvers = {
   Query: {
     bookCount: () => Book.collection.countDocuments(),
     authorCount: () => Author.collection.countDocuments(),
-    allBooks: (root, args) => {
-      if (args.author && args.genre) {
-        return Book.find({ author: args.author, genres: { $in: [args.genre] } }).exec()
-      } else if (args.author) {
-        return Book.find({ author: args.author }).exec()
+    allBooks: async (root, args) => {
+      if (args.author) {
+        const author = await Author.findOne({ name: args.author })
+        return Book.find({ author: author.id })
       } else if (args.genre) {
-        return Book.find({ genres: args.genre }).exec()
-      } else {
-        return Book.find({}).exec()
+        return Book.find({ genres: { $in: [args.genre] } })
       }
+      return Book.find({})
     },
-    allAuthors: () => {
-      return Author.find({}).exec()
+    allAuthors: async () => {
+      return Author.find({}).lean().exec()
     }
   },
   Mutation: {
     addBook: async (root, args) => {
       const author = await Author.findOne({ name: args.author })
+
       if (!author) {
-        throw new UserInputError(`Author ${args.author} not found`)
+        // create a new author
+        const newAuthor = new Author({ name: args.author })
+        const newBook = new Book({ ...args, author: newAuthor })
+        try {
+          await newAuthor.save()
+          await newBook.save()
+        } catch (error) {
+          throw new UserInputError(error.message, {
+            invalidArgs: args
+          })
+        }
+        return newBook
       }
-      const book = new Book({ ...args, author: author })
+
+      const book = new Book({ ...args, author })
       try {
         await book.save()
       } catch (error) {
