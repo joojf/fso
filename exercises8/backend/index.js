@@ -1,4 +1,4 @@
-const { ApolloServer, gql } = require('apollo-server')
+const { ApolloServer, gql, UserInputError } = require('apollo-server')
 const { v1: uuidv1 } = require('uuid')
 
 const authors = [
@@ -107,7 +107,8 @@ const typeDefs = gql`
       author: String!
       published: Int!
       genres: [String!]!
-    ): Book
+    ): Book,
+    editAuthor(name: String!, setBornTo: Int!): Author
   }
 `
 
@@ -143,22 +144,27 @@ const resolvers = {
           name: args.author,
           id: uuidv1()
         }
-        authors.push(newAuthor)
 
-        const newBook = {
-          ...args,
-          id: uuidv1()
-        }
-        books.push(newBook)
-        return newBook
-      } else {
-        const newBook = {
-          ...args,
-          id: uuidv1()
-        }
-        books.push(newBook)
-        return newBook
+        authors.push(newAuthor)
       }
+
+      const book = {
+        ...args,
+        id: uuidv1()
+      }
+
+      books.push(book)
+      return book
+    },
+    editAuthor: (root, args) => {
+      const { name, setBornTo } = args
+      const author = authors.find(a => a.name === name)
+      if (!author) {
+        return new UserInputError(`Author with name ${name} not found`)
+      }
+
+      author.born = setBornTo
+      return author
     }
   }
 }
