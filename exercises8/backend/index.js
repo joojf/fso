@@ -68,16 +68,18 @@ const resolvers = {
     bookCount: () => Book.collection.countDocuments(),
     authorCount: () => Author.collection.countDocuments(),
     allBooks: async (root, args) => {
+      let books = await Book.find({}).populate('author')
       if (args.author) {
-        const author = await Author.findOne({ name: args.author })
-        return Book.find({ author: author.id })
-      } else if (args.genre) {
-        return Book.find({ genres: { $in: [args.genre] } })
+        books = books.filter(b => b.author.name === args.author)
       }
-      return Book.find({})
+      if (args.genre) {
+        books = books.filter(b => b.genres.includes(args.genre))
+      }
+      return books
     },
     allAuthors: async () => {
-      return Author.find({}).lean().exec()
+      const authors = await Author.find({})
+      return authors
     },
     me: (root, args, context) => {
       return context.currentUser
@@ -89,67 +91,61 @@ const resolvers = {
         throw new AuthenticationError('not authenticated')
       }
 
-      const author = await Author.findOne({ name: args.author })
-      if (!author) {
-        const newAuthor = new Author({ name: args.author })
+      const { title, author, published, genres } = args
+      const authorExists = await Author.findOne({ name: author })
+      if (!authorExists) {
+        const newAuthor = new Author({ name: author, bookCount: 0 })
+        const newBook = new Book({ title, author: newAuthor, published, genres })
         try {
           await newAuthor.save()
+          await newBook.save()
+          newAuthor.bookCount++
+          await newAuthor.save()
+          return newBook
         } catch (error) {
-          throw new UserInputError(error.message, {
-            invalidArgs: args
-          })
+          throw new UserInputError(error.message, { invalidArgs: args })
+        }
+      } else {
+        const newBook = new Book({ title, author: authorExists, published, genres })
+        try {
+          await newBook.save()
+          authorExists.bookCount++
+          await authorExists.save()
+          return newBook
+        } catch (error) {
+          throw new UserInputError(error.message, { invalidArgs: args })
         }
       }
-
-      const book = new Book({ ...args, author: author.id })
-      try {
-        await book.save()
-      } catch (error) {
-        throw new UserInputError(error.message, {
-          invalidArgs: args
-        })
-      }
-      return book
     },
     editAuthor: async (root, args, context) => {
       if (!context.currentUser) {
         throw new AuthenticationError('not authenticated')
       }
-
-      const author = await Author.findOne({ name: args.name })
+      const { name, setBornTo } = args
+      const author = await Author.findOne({ name })
       if (!author) {
-        const newAuthor = new Author({ name: args.name, born: args.setBornTo })
-        try {
-          await newAuthor.save()
-        } catch (error) {
-          throw new UserInputError(error.message, {
-            invalidArgs: args
-          })
-        }
-      } else {
-        author.born = args.setBornTo
-        try {
-          await author.save()
-        } catch (error) {
-          throw new UserInputError(error.message, {
-            invalidArgs: args
-          })
-        }
+        return null
       }
-      return author
+      author.born = setBornTo
+      try {
+        await author.save()
+        return author
+      } catch (error) {
+        throw new UserInputError(error.message, { invalidArgs: args })
+      }
     },
     createUser: async (root, args) => {
-      const user = new User({ username: args.username, favoriteGenre: args.favoriteGenre })
-
-      try {
-        await user.save()
-      } catch (error) {
-        throw new UserInputError(error.message, {
-          invalidArgs: args
-        })
+      const user = await User.findOne({ username: args.username })
+      if (user) {
+        throw new UserInputError('username taken')
       }
-
-      return user
+      const newUser = new User({ username: args.username, favoriteGenre: args.favoriteGenre })
+      try {
+        await newUser.save()
+        return newUser
+      } catch (error) {
+        throw new UserInputError(error.message, { invalidArgs: args })
+      }
     },
     login: async (root, args) => {
       const user = await User.findOne({ username: args.username })
