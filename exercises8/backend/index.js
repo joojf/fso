@@ -1,5 +1,5 @@
 const { ApolloServer, gql, UserInputError } = require('apollo-server')
-const { v1: uuidv1 } = require('uuid')
+const { v1: uuid } = require('uuid')
 
 const authors = [
   {
@@ -137,22 +137,16 @@ const resolvers = {
     }
   },
   Mutation: {
-    addBook: (root, args) => {
+    addBook: async (root, args) => {
+      const book = { ...args, id: uuid() }
       const author = authors.find(a => a.name === args.author)
       if (!author) {
         const newAuthor = {
           name: args.author,
-          id: uuidv1()
+          id: uuid()
         }
-
         authors.push(newAuthor)
       }
-
-      const book = {
-        ...args,
-        id: uuidv1()
-      }
-
       books.push(book)
       return book
     },
