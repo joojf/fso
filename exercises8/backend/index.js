@@ -121,15 +121,20 @@ const resolvers = {
       if (!context.currentUser) {
         throw new AuthenticationError('not authenticated')
       }
+
       const { name, setBornTo } = args
       const author = await Author.findOne({ name })
+
       if (!author) {
-        return null
+        throw new UserInputError(`Author ${name} not found`)
       }
-      author.born = setBornTo
       try {
-        await author.save()
-        return author
+        const updatedAuthor = await Author.findOneAndUpdate(
+          { name },
+          { born: setBornTo },
+          { new: true }
+        )
+        return updatedAuthor
       } catch (error) {
         throw new UserInputError(error.message, { invalidArgs: args })
       }
