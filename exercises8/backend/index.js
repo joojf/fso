@@ -154,9 +154,19 @@ const resolvers = {
     addBook: async (root, args) => {
       const author = await Author.findOne({ name: args.author })
       if (!author) {
-        // create a new author and assign it to the book
+        if (args.author.length < 4) {
+          throw new UserInputError('Author name must be at least 4 characters long', {
+            invalidArgs: args.author
+          })
+        } else if (args.book.length < 2) {
+          throw new UserInputError('Book title must be at least 2 characters long', {
+            invalidArgs: args.book
+          })
+        }
+
         const newAuthor = new Author({ name: args.author, bookCount: 1 })
         const newBook = new Book({ ...args, author: newAuthor })
+
         try {
           await newAuthor.save()
           await newBook.save()
@@ -170,6 +180,7 @@ const resolvers = {
       } else {
         const newBook = new Book({ ...args, author })
         Author.updateOne({ name: args.author }, { $inc: { bookCount: 1 } })
+
         try {
           await newBook.save()
           return newBook
@@ -180,13 +191,9 @@ const resolvers = {
         }
       }
     },
-    editAuthor: (root, args) => {
-      const findAuthor = Author.findOne({ name: args.name })
-      if (!findAuthor) {
-        throw new UserInputError(`Author ${args.name} not found`)
-      }
-
-      return Author.findOneAndUpdate({ name: args.name }, { born: args.setBornTo })
+    editAuthor: async (root, args) => {
+      Author.updateOne({ name: args.name }, { born: args.setBornTo })
+      return Author.findOne({ name: args.name })
     }
   }
 }
