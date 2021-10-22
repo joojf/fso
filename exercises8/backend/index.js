@@ -1,7 +1,21 @@
 const { ApolloServer, gql, UserInputError } = require('apollo-server')
 const { v1: uuid } = require('uuid')
+const mongoose = require('mongoose')
+const Author = require('./models/Authors.js')
+const Book = require('./models/Books.js')
+require('dotenv').config()
 
-const authors = [
+const MONGODB_URI = process.env.MONGODB_URI
+
+mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => {
+    console.log('connected to MongoDB')
+  })
+  .catch((error) => {
+    console.log('error connection to MongoDB:', error.message)
+  })
+
+/* const authors = [
   {
     name: 'Robert Martin',
     id: 'afa51ab0-344d-11e9-a414-719c6709cf3e',
@@ -77,13 +91,13 @@ const books = [
     id: 'afa5de04-344d-11e9-a414-719c6709cf3e',
     genres: ['classic', 'revolution']
   }
-]
+] */
 
 const typeDefs = gql`
   type Book {
     title: String!
     published: Int!
-    author: String!
+    author: Author!
     id: ID!
     genres: [String!]!
   }
