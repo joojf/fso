@@ -1,5 +1,4 @@
 const { ApolloServer, gql, UserInputError } = require('apollo-server')
-const { v1: uuid } = require('uuid')
 const mongoose = require('mongoose')
 const Author = require('./models/Authors.js')
 const Book = require('./models/Books.js')
@@ -128,51 +127,66 @@ const typeDefs = gql`
 
 const resolvers = {
   Query: {
-    bookCount: () => books.length,
-    authorCount: () => authors.length,
-    allBooks: (root, args) => {
+    bookCount: () => Book.collection.countDocuments(),
+    authorCount: () => Author.collection.countDocuments(),
+    allBooks: async (root, args) => {
+      const books = await Book.find({}).populate('author')
       if (args.author) {
-        return books.filter(book => book.author === args.author)
-      } else if (args.genre) {
+        return books.filter(book => book.author.name === args.author)
+      }
+      if (args.genre) {
         return books.filter(book => book.genres.includes(args.genre))
-      } else {
-        return books
       }
+      return books
     },
-    allAuthors: () => {
-      return authors.map(a => {
+    allAuthors: async () => {
+      const authors = await Author.find({})
+      return authors.map(author => {
         return {
-          name: a.name,
-          born: a.born,
-          bookCount: books.filter(b => b.author === a.name).length
+          name: author.name,
+          born: author.born,
+          bookCount: author.bookCount
         }
-      }
-      )
+      })
     }
   },
   Mutation: {
     addBook: async (root, args) => {
-      const book = { ...args, id: uuid() }
-      const author = authors.find(a => a.name === args.author)
+      const author = await Author.findOne({ name: args.author })
       if (!author) {
-        const newAuthor = {
-          name: args.author,
-          id: uuid()
+        // create a new author and assign it to the book
+        const newAuthor = new Author({ name: args.author, bookCount: 1 })
+        const newBook = new Book({ ...args, author: newAuthor })
+        try {
+          await newAuthor.save()
+          await newBook.save()
+
+          return newBook
+        } catch (error) {
+          throw new UserInputError(error.message, {
+            invalidArgs: args
+          })
         }
-        authors.push(newAuthor)
+      } else {
+        const newBook = new Book({ ...args, author })
+        Author.updateOne({ name: args.author }, { $inc: { bookCount: 1 } })
+        try {
+          await newBook.save()
+          return newBook
+        } catch (error) {
+          throw new UserInputError(error.message, {
+            invalidArgs: args
+          })
+        }
       }
-      books.push(book)
-      return book
     },
     editAuthor: (root, args) => {
-      const { name, setBornTo } = args
-      const author = authors.find(a => a.name === name)
-      if (!author) {
-        return new UserInputError(`Author with name ${name} not found`)
+      const findAuthor = Author.findOne({ name: args.name })
+      if (!findAuthor) {
+        throw new UserInputError(`Author ${args.name} not found`)
       }
 
-      author.born = setBornTo
-      return author
+      return Author.findOneAndUpdate({ name: args.name }, { born: args.setBornTo })
     }
   }
 }
