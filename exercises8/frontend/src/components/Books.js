@@ -5,6 +5,8 @@ import { ALL_BOOKS } from '../queries'
 
 const Books = () => {
   const [books, setBooks] = useState([])
+  const [genre, setGenre] = useState('')
+
   const result = useQuery(ALL_BOOKS)
 
   useEffect(() => {
@@ -15,6 +17,10 @@ const Books = () => {
 
   if (!result.data) {
     return <div>loading...</div>
+  }
+
+  const handleFilter = (event) => {
+    setGenre(event.target.value)
   }
 
   return (
@@ -32,7 +38,8 @@ const Books = () => {
               published
             </th>
           </tr>
-          {books.map(a =>
+          {// map the books to the table rows according to the filter, if no filter, show all
+          books.filter(b => genre === '' || b.genres.includes(genre)).map(a =>
             <tr key={a.title}>
               <td>{a.title}</td>
               <td>{a.author.name}</td>
@@ -41,6 +48,14 @@ const Books = () => {
           )}
         </tbody>
       </table>
+      <div>
+        {
+          result.data.allBooks.map(b => b.genres).flat().filter((v, i, a) => a.indexOf(v) === i).map(g =>
+            <button key={g} value={g} onClick={handleFilter}>{g}</button>
+          )
+        }
+        <button onClick={() => setGenre('')}>all genres</button>
+      </div>
     </div>
   )
 }
