@@ -1,10 +1,15 @@
 const { ApolloServer, gql, UserInputError, AuthenticationError } = require('apollo-server')
+const { PubSub } = require('graphql-subscriptions')
 const mongoose = require('mongoose')
+
 const Author = require('./models/Authors.js')
 const Book = require('./models/Books.js')
 const User = require('./models/Users.js')
+
 const jwt = require('jsonwebtoken')
+
 require('dotenv').config()
+const pubsub = new PubSub()
 
 const MONGODB_URI = process.env.MONGODB_URI
 const JWT_SECRET = process.env.JWT_SECRET
@@ -139,6 +144,10 @@ const typeDefs = gql`
     createUser(username: String!, favoriteGenre: String!): User
     login(username: String!, password: String!): Token
   }
+
+  type Subscription {
+    bookAdded: Book!
+  }
 `
 
 const resolvers = {
@@ -186,6 +195,8 @@ const resolvers = {
           await newAuthor.save()
           await newBook.save()
 
+          pubsub.publish('BOOK_ADDED', { bookAdded: newBook })
+
           return newBook
         } catch (error) {
           throw new UserInputError(error.message, {
@@ -198,6 +209,9 @@ const resolvers = {
 
         try {
           await newBook.save()
+
+          pubsub.publish('BOOK_ADDED', { bookAdded: newBook })
+
           return newBook
         } catch (error) {
           throw new UserInputError(error.message, {
@@ -233,6 +247,11 @@ const resolvers = {
 
       return { value: jwt.sign(userForToken, JWT_SECRET) }
     }
+  },
+  Subscription: {
+    bookAdded: {
+      subscribe: () => pubsub.asyncIterator(['BOOK_ADDED'])
+    }
   }
 }
 
@@ -251,4 +270,5 @@ const server = new ApolloServer({
 
 server.listen().then(({ url }) => {
   console.log(`Server ready at ${url}`)
+  console.log(`Subscriptions ready at ${url}/subscriptions`)
 })
