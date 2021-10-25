@@ -1,8 +1,9 @@
 import React, { useState } from 'react'
-import { useMutation } from '@apollo/client'
+import { useMutation, useSubscription } from '@apollo/client'
 
 import { CREATE_BOOK } from '../mutations'
 import { ALL_BOOKS } from '../queries'
+import { BOOK_ADDED } from '../subscriptions'
 
 const NewBook = () => {
   const [title, setTitle] = useState('')
@@ -32,6 +33,12 @@ const NewBook = () => {
     setGenres([])
     setGenre('')
   }
+
+  useSubscription(BOOK_ADDED, {
+    onSubscriptionData: ({ subscriptionData }) => {
+      window.alert(`${subscriptionData.data.bookAdded.title} added`)
+    }
+  })
 
   const addGenre = () => {
     setGenres(genres.concat(genre))
