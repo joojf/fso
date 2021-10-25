@@ -25,3 +25,13 @@ query Query {
   }
 }
 `
+
+export const GET_USER = gql`
+query Query {
+  me {
+    username
+    favoriteGenre
+    id
+  }
+}
+`
